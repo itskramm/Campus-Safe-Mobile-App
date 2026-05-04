@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_primary"
+    android:fitsSystemWindows="true"
+    android:padding="32dp">
+
+    <TextView
+        android:id="@+id/tvBiometricTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:text="BIOMETRIC LOGIN"
+        android:textColor="@color/text_primary"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivFingerprint"
+        android:layout_width="194dp"
+        android:layout_height="187dp"
+        android:layout_marginTop="48dp"
+        android:src="@drawable/ic_fringerprint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBiometricTitle" />
+
+    <TextView
+        android:id="@+id/tvFingerprintDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Scan your fingerprints to Login"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ivFingerprint" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnUseFingerprints"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="48dp"
+        android:backgroundTint="@color/btn_gray"
+        android:text="Use Fingerprints"
+        android:textAllCaps="false"
+        android:textColor="@color/text_primary"
+        app:cornerRadius="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvFingerprintDesc" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnUseLogin"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/btn_gray"
+        android:text="Use Login"
+        android:textAllCaps="false"
+        android:textColor="@color/text_primary"
+        app:cornerRadius="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnUseFingerprints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

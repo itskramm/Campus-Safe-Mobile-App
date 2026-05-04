@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme colors -->
+    <color name="bg_primary">#050818</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#BDBDBD</color>
+    <color name="card_bg">#1A1F3D</color>
+    <color name="card_stroke">#252B4B</color>
+    <color name="bottom_nav_bg">#1A1F3D</color>
+    <color name="nav_icon_tint">#FFFFFF</color>
+    <color name="nav_text_color">#FFFFFF</color>
+    <color name="top_bar_bg">#1A1F3D</color>
+    <color name="top_bar_text">#FFFFFF</color>
+    <color name="theme_toggle_tint">#FFFFFF</color>
+    <color name="nav_selected">#4285F4</color>
+    <color name="input_bg">#1A1F3D</color>
+</resources>

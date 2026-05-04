@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">CampusSafeApplication</string>
+    <string name="campus_safe">Campus Safe</string>
+    <string name="shield_icon_desc">Shield with checkmark</string>
+    <string-array name="building_array">
+        <item>Main Building</item>
+    </string-array>
+    <string-array name="floor_array">
+        <item>Basement</item>
+        <item>Ground floor</item>
+        <item>Second floor</item>
+        <item>Third floor</item>
+        <item>Fourth floor</item>
+        <item>Fifth floor</item>
+        <item>Sixth floor</item>
+        <item>Seventh floor</item>
+        <item>Eighth floor</item>
+    </string-array>
+    <string name="default_web_client_id">YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com</string>
+    <string name="settings">Settings</string>
+    <string name="toggle_theme">Toggle dark or light mode</string>
+</resources>
