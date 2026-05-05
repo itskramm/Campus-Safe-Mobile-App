@@ -117,63 +117,11 @@
             android:textColor="@color/text_primary"
             android:visibility="gone"
             app:cornerRadius="25dp"
-            app:layout_constraintBottom_toTopOf="@+id/orLayout"
+            app:layout_constraintBottom_toTopOf="@+id/btnCreateAccount"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnLogin"
             tools:visibility="visible" />
-
-        <LinearLayout
-            android:id="@+id/orLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/btnGoogle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnBiometric">
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"
-                android:background="@color/bg_primary" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:text="or"
-                android:textColor="@color/text_primary" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"
-                android:background="@color/bg_primary" />
-        </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGoogle"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-            android:layout_width="0dp"
-            android:layout_height="55dp"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/white"
-            android:text="Sign in with Google"
-            android:textAllCaps="false"
-            android:textColor="@color/black"
-            app:cornerRadius="25dp"
-            app:icon="@drawable/google_logo"
-            app:iconGravity="textStart"
-            app:iconPadding="12dp"
-            app:iconTint="@null"
-            app:layout_constraintBottom_toTopOf="@+id/btnCreateAccount"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/orLayout" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCreateAccount"
@@ -189,7 +137,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnGoogle" />
+            app:layout_constraintTop_toBottomOf="@+id/btnBiometric" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -11,9 +11,14 @@ CREATE TABLE IF NOT EXISTS public.users (
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
   phone_number TEXT,
+  hardware_id TEXT,
   biometric_enabled BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Ensure existing databases also get this column
+ALTER TABLE public.users
+  ADD COLUMN IF NOT EXISTS hardware_id TEXT;
 
 -- Hazard Reports table
 CREATE TABLE IF NOT EXISTS public.hazard_reports (
@@ -49,6 +54,9 @@ CREATE INDEX IF NOT EXISTS idx_hazard_reports_user_id ON public.hazard_reports(u
 CREATE INDEX IF NOT EXISTS idx_hazard_reports_status ON public.hazard_reports(status);
 CREATE INDEX IF NOT EXISTS idx_hazard_reports_created_at ON public.hazard_reports(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_safety_tips_category ON public.safety_tips(category);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_hardware_id_unique
+  ON public.users(hardware_id)
+  WHERE hardware_id IS NOT NULL;
 
 -- ============================================
 -- 3. ENABLE ROW LEVEL SECURITY (RLS)
@@ -140,8 +148,13 @@ ON CONFLICT DO NOTHING;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.users (id, email, full_name)
-  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
+  INSERT INTO public.users (id, email, full_name, hardware_id)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'hardware_id'
+  );
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

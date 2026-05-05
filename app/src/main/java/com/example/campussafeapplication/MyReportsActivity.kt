@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -32,9 +33,19 @@ class MyReportsActivity : AppCompatActivity() {
     private lateinit var imageViews: List<ImageView>
 
     private lateinit var cardContainers: List<View>
+    private lateinit var tabMyReports: View
+    private lateinit var tabHistory: View
+    private lateinit var tabMyReportsText: TextView
+    private lateinit var tabHistoryText: TextView
+    private lateinit var tabMyReportsIndicator: View
+    private lateinit var tabHistoryIndicator: View
 
     private val displayedReports: MutableList<HazardReport?> = MutableList(4) { null }
+    private var allReports: List<HazardReport> = emptyList()
     private var isRefreshingAfterAction = false
+    private var activeTab: ReportTab = ReportTab.MY_REPORTS
+
+    private enum class ReportTab { MY_REPORTS, HISTORY }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +57,7 @@ class MyReportsActivity : AppCompatActivity() {
         bindViews()
         setupNavigation()
         SwipeNavigationHelper.attach(this, SwipeNavigationHelper.Screen.REPORTS)
+        setupTabs()
         setupActionButtons()
         observeReports()
         loadReports()
@@ -88,6 +100,12 @@ class MyReportsActivity : AppCompatActivity() {
             findViewById(R.id.imgReport3),
             findViewById(R.id.imgReport4)
         )
+        tabMyReports = findViewById(R.id.tabMyReports)
+        tabHistory = findViewById(R.id.tabHistory)
+        tabMyReportsText = findViewById(R.id.tvTabMyReports)
+        tabHistoryText = findViewById(R.id.tvTabHistory)
+        tabMyReportsIndicator = findViewById(R.id.viewTabMyReportsIndicator)
+        tabHistoryIndicator = findViewById(R.id.viewTabHistoryIndicator)
     }
 
     private fun setupNavigation() {
@@ -106,6 +124,35 @@ class MyReportsActivity : AppCompatActivity() {
         findViewById<android.view.View>(R.id.navSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+    }
+
+    private fun setupTabs() {
+        tabMyReports.setOnClickListener {
+            if (activeTab != ReportTab.MY_REPORTS) {
+                activeTab = ReportTab.MY_REPORTS
+                updateTabUi()
+                bindReportCards(filteredReportsForActiveTab())
+            }
+        }
+        tabHistory.setOnClickListener {
+            if (activeTab != ReportTab.HISTORY) {
+                activeTab = ReportTab.HISTORY
+                updateTabUi()
+                bindReportCards(filteredReportsForActiveTab())
+            }
+        }
+        updateTabUi()
+    }
+
+    private fun updateTabUi() {
+        val selected = ContextCompat.getColor(this, R.color.nav_selected)
+        val unselected = ContextCompat.getColor(this, R.color.text_primary)
+
+        val isMyReports = activeTab == ReportTab.MY_REPORTS
+        tabMyReportsText.setTextColor(if (isMyReports) selected else unselected)
+        tabHistoryText.setTextColor(if (isMyReports) unselected else selected)
+        tabMyReportsIndicator.visibility = if (isMyReports) View.VISIBLE else View.INVISIBLE
+        tabHistoryIndicator.visibility = if (isMyReports) View.INVISIBLE else View.VISIBLE
     }
 
     private fun setupActionButtons() {
@@ -151,7 +198,8 @@ class MyReportsActivity : AppCompatActivity() {
     private fun observeReports() {
         lifecycleScope.launch {
             reportViewModel.reports.collect { reports ->
-                bindReportCards(reports)
+                allReports = reports
+                bindReportCards(filteredReportsForActiveTab())
             }
         }
 
@@ -182,6 +230,13 @@ class MyReportsActivity : AppCompatActivity() {
         reportViewModel.getUserReports(userId)
     }
 
+    private fun filteredReportsForActiveTab(): List<HazardReport> {
+        return when (activeTab) {
+            ReportTab.MY_REPORTS -> allReports.filter { it.status.orEmpty().lowercase() != "resolved" }
+            ReportTab.HISTORY -> allReports.filter { it.status.orEmpty().lowercase() == "resolved" }
+        }
+    }
+
     private fun bindReportCards(reports: List<HazardReport>) {
         for (index in 0 until 4) {
             val report = reports.getOrNull(index)
@@ -193,11 +248,13 @@ class MyReportsActivity : AppCompatActivity() {
             }
 
             cardContainers[index].visibility = View.VISIBLE
-            statusViews[index].text = report.status
-            titleViews[index].text = report.description.substringBefore(":").uppercase()
-            locationViews[index].text = report.location
+            val description = report.description.orEmpty()
+            val status = report.status.orEmpty().ifBlank { "Unknown" }
+            statusViews[index].text = status
+            titleViews[index].text = description.substringBefore(":").ifBlank { "REPORT" }.uppercase()
+            locationViews[index].text = report.location.orEmpty()
             timeViews[index].text = formatTimeAgo(report.createdAt)
-            statusViews[index].backgroundTintList = ColorStateList.valueOf(statusColor(report.status))
+            statusViews[index].backgroundTintList = ColorStateList.valueOf(statusColor(status))
 
             if (!report.imageUrl.isNullOrBlank()) {
                 imageViews[index].visibility = View.VISIBLE
@@ -211,8 +268,9 @@ class MyReportsActivity : AppCompatActivity() {
     }
 
     private fun showEditDialog(report: HazardReport) {
+        val description = report.description.orEmpty()
         val input = android.widget.EditText(this).apply {
-            setText(report.description.substringAfter(":", report.description).trim())
+            setText(description.substringAfter(":", description).trim())
             setSelection(text.length)
         }
         AlertDialog.Builder(this)
@@ -224,7 +282,8 @@ class MyReportsActivity : AppCompatActivity() {
                     Toast.makeText(this, "Description cannot be empty.", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                val updated = "${report.description.substringBefore(":")}: $newDescription"
+                val prefix = description.substringBefore(":").ifBlank { "Report" }
+                val updated = "$prefix: $newDescription"
                 isRefreshingAfterAction = true
                 report.id?.let {
                     reportViewModel.updateReport(it, mapOf("description" to updated))

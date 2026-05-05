@@ -1,6 +1,7 @@
 package com.example.campussafeapplication.repository
 
 import com.example.campussafeapplication.models.HazardReport
+import com.example.campussafeapplication.models.User
 import com.example.campussafeapplication.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
@@ -57,7 +58,7 @@ class HazardReportRepository {
                 }
                 .decodeList<HazardReport>()
             
-            Result.success(reports)
+            Result.success(enrichReportsWithReporterNames(reports))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -137,6 +138,37 @@ class HazardReportRepository {
             Result.success(reports)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    private suspend fun enrichReportsWithReporterNames(reports: List<HazardReport>): List<HazardReport> {
+        if (reports.isEmpty()) return reports
+
+        val fallback: (HazardReport) -> String = { report ->
+            report.userId?.takeLast(6)?.let { "Reporter $it" } ?: "Campus Reporter"
+        }
+
+        return try {
+            val users = client.from("users")
+                .select()
+                .decodeList<User>()
+
+            val namesById = users
+                .mapNotNull { user ->
+                    val id = user.id ?: return@mapNotNull null
+                    val name = user.fullName?.takeIf { it.isNotBlank() }
+                        ?: user.email.substringBefore("@")
+                    id to name
+                }
+                .toMap()
+
+            reports.map { report ->
+                report.copy(reporterName = namesById[report.userId] ?: fallback(report))
+            }
+        } catch (_: Exception) {
+            reports.map { report ->
+                report.copy(reporterName = fallback(report))
+            }
         }
     }
 }

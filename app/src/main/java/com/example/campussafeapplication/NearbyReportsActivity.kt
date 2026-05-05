@@ -5,11 +5,13 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.campussafeapplication.models.HazardReport
 import com.example.campussafeapplication.utils.SwipeNavigationHelper
 import com.example.campussafeapplication.viewmodels.HazardReportViewModel
@@ -27,8 +29,10 @@ class NearbyReportsActivity : AppCompatActivity() {
 
     private lateinit var titleViews: List<TextView>
     private lateinit var locationViews: List<TextView>
+    private lateinit var reporterViews: List<TextView>
     private lateinit var statusViews: List<TextView>
     private lateinit var timeViews: List<TextView>
+    private lateinit var iconViews: List<ImageView>
 
     private var allReports: List<HazardReport> = emptyList()
     private var displayedReports: List<HazardReport> = emptyList()
@@ -66,6 +70,11 @@ class NearbyReportsActivity : AppCompatActivity() {
             findViewById(R.id.tvReportLocation2),
             findViewById(R.id.tvReportLocation3)
         )
+        reporterViews = listOf(
+            findViewById(R.id.tvReportReporter1),
+            findViewById(R.id.tvReportReporter2),
+            findViewById(R.id.tvReportReporter3)
+        )
         statusViews = listOf(
             findViewById(R.id.tvReportStatus1),
             findViewById(R.id.tvReportStatus2),
@@ -75,6 +84,11 @@ class NearbyReportsActivity : AppCompatActivity() {
             findViewById(R.id.tvReportTime1),
             findViewById(R.id.tvReportTime2),
             findViewById(R.id.tvReportTime3)
+        )
+        iconViews = listOf(
+            findViewById(R.id.icon1),
+            findViewById(R.id.icon2),
+            findViewById(R.id.icon3)
         )
     }
 
@@ -121,10 +135,15 @@ class NearbyReportsActivity : AppCompatActivity() {
             if (report == null) {
                 Toast.makeText(this, "No report to view.", Toast.LENGTH_SHORT).show()
             } else {
+                val description = report.description.orEmpty()
+                val reportTitle = description.substringBefore(":").ifBlank { "REPORT" }.uppercase()
+                val reportDetails = description.substringAfter(":", description).trim()
+                val statusText = report.status.orEmpty().ifBlank { "Unknown" }
+                val reporterName = report.reporterName.orEmpty().ifBlank { "Campus Reporter" }
                 AlertDialog.Builder(this)
-                    .setTitle(report.description.substringBefore(":").uppercase())
+                    .setTitle(reportTitle)
                     .setMessage(
-                        "Location: ${report.location}\nStatus: ${report.status}\n\nDetails:\n${report.description.substringAfter(":", report.description).trim()}"
+                        "Location: ${report.location.orEmpty()}\nReported by: $reporterName\nStatus: $statusText\n\nDetails:\n$reportDetails"
                     )
                     .setPositiveButton("OK", null)
                     .show()
@@ -138,8 +157,9 @@ class NearbyReportsActivity : AppCompatActivity() {
                 Toast.makeText(this, "No report to edit.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            val description = report.description.orEmpty()
             val input = android.widget.EditText(this).apply {
-                setText(report.description.substringAfter(":", report.description).trim())
+                setText(description.substringAfter(":", description).trim())
             }
             AlertDialog.Builder(this)
                 .setTitle("Edit Report Description")
@@ -150,7 +170,8 @@ class NearbyReportsActivity : AppCompatActivity() {
                         Toast.makeText(this, "Description cannot be empty.", Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
-                    val newValue = "${report.description.substringBefore(":")}: $updated"
+                    val prefix = description.substringBefore(":").ifBlank { "Report" }
+                    val newValue = "$prefix: $updated"
                     reportViewModel.updateReport(id, mapOf("description" to newValue))
                 }
                 .setNegativeButton("Cancel", null)
@@ -198,17 +219,37 @@ class NearbyReportsActivity : AppCompatActivity() {
             if (report == null) {
                 titleViews[index].text = "NO REPORT"
                 locationViews[index].text = "No nearby report found for this filter."
+                reporterViews[index].text = ""
                 statusViews[index].text = "Status: N/A"
                 statusViews[index].backgroundTintList = ColorStateList.valueOf(0xFF757575.toInt())
                 timeViews[index].text = ""
                 continue
             }
 
-            titleViews[index].text = report.description.substringBefore(":").uppercase()
+            val description = report.description.orEmpty()
+            val status = report.status.orEmpty().ifBlank { "Unknown" }
+            val reporterName = report.reporterName.orEmpty().ifBlank { "Campus Reporter" }
+            titleViews[index].text = description.substringBefore(":").ifBlank { "REPORT" }.uppercase()
             locationViews[index].text = report.location.orEmpty()
-            statusViews[index].text = "Status: ${report.status}"
-            statusViews[index].backgroundTintList = ColorStateList.valueOf(statusColor(report.status))
+            reporterViews[index].text = "Reported by: $reporterName"
+            statusViews[index].text = "Status: $status"
+            statusViews[index].backgroundTintList = ColorStateList.valueOf(statusColor(status))
             timeViews[index].text = formatTimeAgo(report.createdAt)
+
+            if (!report.imageUrl.isNullOrBlank()) {
+                Glide.with(this)
+                    .load(report.imageUrl)
+                    .into(iconViews[index])
+                iconViews[index].imageTintList = null
+            } else {
+                // Fallback to default icons if no image
+                val defaultIcon = when (report.hazardType.orEmpty().lowercase()) {
+                    "fire" -> R.drawable.ic_fire
+                    else -> android.R.drawable.stat_sys_warning
+                }
+                iconViews[index].setImageResource(defaultIcon)
+                // Set some default tint if needed, or keep it original
+            }
         }
     }
 

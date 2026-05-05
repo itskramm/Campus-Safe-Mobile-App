@@ -53,18 +53,23 @@
         app:layout_constraintTop_toBottomOf="@id/topBar">
 
         <LinearLayout
+            android:id="@+id/tabMyReports"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
             <TextView
+                android:id="@+id/tvTabMyReports"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="My Reports"
                 android:textColor="#4285F4"
                 android:textSize="16sp" />
             <View
+                android:id="@+id/viewTabMyReportsIndicator"
                 android:layout_width="100dp"
                 android:layout_height="3dp"
                 android:layout_marginTop="4dp"
@@ -72,16 +77,28 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/tabHistory"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
             <TextView
+                android:id="@+id/tvTabHistory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="History"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp" />
+            <View
+                android:id="@+id/viewTabHistoryIndicator"
+                android:layout_width="100dp"
+                android:layout_height="3dp"
+                android:layout_marginTop="4dp"
+                android:background="#4285F4"
+                android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>
 

@@ -176,6 +176,13 @@
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                         <TextView
+                            android:id="@+id/tvReportReporter1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Reported by: Campus Reporter"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
+                        <TextView
                             android:id="@+id/tvReportStatus1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -234,6 +241,13 @@
                             android:text="Computer Lab . Floor 6 . Room 601"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
+                        <TextView
+                            android:id="@+id/tvReportReporter2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Reported by: Campus Reporter"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
                         <TextView
                             android:id="@+id/tvReportStatus2"
                             android:layout_width="wrap_content"
@@ -294,6 +308,13 @@
                             android:text="Main Building . Floor 2 . Near at boys restroom"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
+                        <TextView
+                            android:id="@+id/tvReportReporter3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Reported by: Campus Reporter"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
                         <TextView
                             android:id="@+id/tvReportStatus3"
                             android:layout_width="wrap_content"

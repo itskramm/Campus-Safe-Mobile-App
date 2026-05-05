@@ -36,11 +36,11 @@ class AuthViewModel : ViewModel() {
         data class Error(val message: String) : ProfileState()
     }
     
-    fun signUp(email: String, password: String, fullName: String) {
+    fun signUp(email: String, password: String, fullName: String, hardwareId: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             
-            val result = authRepository.signUp(email, password, fullName)
+            val result = authRepository.signUp(email, password, fullName, hardwareId)
             
             result.onSuccess { user ->
                 _currentUser.value = user
@@ -50,25 +50,12 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
-
-    fun signInWithGoogle(idToken: String) {
-        viewModelScope.launch {
-            _authState.value = AuthState.Loading
-            val result = authRepository.signInWithGoogle(idToken)
-            result.onSuccess { user ->
-                _currentUser.value = user
-                _authState.value = AuthState.Success(user)
-            }.onFailure { error ->
-                _authState.value = AuthState.Error(error.message ?: "Google sign in failed")
-            }
-        }
-    }
     
-    fun signIn(email: String, password: String) {
+    fun signIn(email: String, password: String, hardwareId: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             
-            val result = authRepository.signIn(email, password)
+            val result = authRepository.signIn(email, password, hardwareId)
             
             result.onSuccess { user ->
                 _currentUser.value = user

@@ -2,6 +2,7 @@ package com.example.campussafeapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -79,7 +80,12 @@ class CreateAccountActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             
-            authViewModel.signUp(email, password, fullName)
+            val hardwareId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID).orEmpty()
+            if (hardwareId.isBlank()) {
+                Toast.makeText(this, "Unable to identify this device. Please try again.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            authViewModel.signUp(email, password, fullName, hardwareId)
         }
         
         btnBack.setOnClickListener {

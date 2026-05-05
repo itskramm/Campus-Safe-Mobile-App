@@ -13,6 +13,8 @@ data class User(
     val phoneNumber: String? = null,
     @SerialName("biometric_enabled")
     val biometricEnabled: Boolean = false,
+    @SerialName("hardware_id")
+    val hardwareId: String? = null,
     @SerialName("created_at")
     val createdAt: String? = null
 )

@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">CampusSafeApplication</string>
+    <string name="app_name">Campus Safe</string>
     <string name="campus_safe">Campus Safe</string>
+    <string name="app_logo_desc">Campus Safe logo</string>
     <string name="shield_icon_desc">Shield with checkmark</string>
     <string-array name="building_array">
         <item>Main Building</item>

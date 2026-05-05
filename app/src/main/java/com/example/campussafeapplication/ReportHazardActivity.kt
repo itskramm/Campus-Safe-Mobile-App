@@ -36,10 +36,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 class ReportHazardActivity : AppCompatActivity() {
 
@@ -266,8 +262,10 @@ class ReportHazardActivity : AppCompatActivity() {
                 val latitude = if (cbUseGps.isChecked) currentLocation?.latitude ?: 0.0 else 0.0
                 val longitude = if (cbUseGps.isChecked) currentLocation?.longitude ?: 0.0 else 0.0
 
+                val userName = sessionManager.getUserName() ?: "Campus Reporter"
                 val report = HazardReport(
                     userId = userId,
+                    reporterName = userName,
                     title = title,
                     building = building,
                     floor = floor,
@@ -290,10 +288,20 @@ class ReportHazardActivity : AppCompatActivity() {
         return withContext(Dispatchers.IO) {
             try {
                 val prompt = """
-                    You are an AI hazard validator for STI College Global City.
-                    Analyze if the following report is a valid campus hazard.
-                    A valid hazard is something that poses a threat to safety (fire, leak, broken structure, etc.).
-                    Spam, jokes, or non-hazard content should be rejected.
+                    You are a strict but fair validator for STI College Global City's report system.
+                    Decide whether this is a VALID campus incident report.
+                    
+                    VALID reports include:
+                    - Direct safety hazards (fire, smoke, leaks, exposed wiring, broken structure, slippery floor, security threats).
+                    - Broken campus appliances or equipment that affect student/staff safety or operations
+                      (specifically: broken PC monitors, non-working electric fans, leaking or non-cooling air conditioners, faulty projectors, or malfunctioning laboratory equipment).
+                    - Facility issues that could escalate into safety risks or significantly hinder classroom/office activities.
+                    
+                    INVALID reports include:
+                    - Jokes, spam, nonsense, insults, or unrelated personal complaints.
+                    - Reports without a real issue being described.
+                    
+                    If the report describes a broken appliance or a real campus issue, mark it as valid.
                     
                     Title: $title
                     Description: $description
@@ -319,10 +327,18 @@ class ReportHazardActivity : AppCompatActivity() {
                 }
 
                 val response = generativeModel.generateContent(inputContent)
-                val responseText = response.text ?: ""
-                val json = JSONObject(responseText)
-                val isValid = json.getBoolean("isValid")
-                val reason = json.getString("reason")
+                val responseText = response.text.orEmpty()
+                val jsonPayload = extractJsonObject(responseText)
+                    ?: throw IllegalStateException("AI response did not contain JSON.")
+                val json = JSONObject(jsonPayload)
+                var isValid = json.getBoolean("isValid")
+                var reason = json.optString("reason", "No reason provided.")
+
+                // Keep broken appliances/equipment reportable even when the model is overly strict.
+                if (!isValid && isLikelyBrokenApplianceIssue(title, description)) {
+                    isValid = true
+                    reason = "Accepted as a valid facility equipment issue."
+                }
 
                 withContext(Dispatchers.Main) {
                     if (!isValid) {
@@ -354,8 +370,47 @@ class ReportHazardActivity : AppCompatActivity() {
             "medical" in lower || "injury" in lower || "blood" in lower || "faint" in lower -> "Medical"
             "security" in lower || "threat" in lower || "theft" in lower || "suspicious" in lower -> "Security"
             "structural" in lower || "ceiling" in lower || "wall" in lower || "elevator" in lower -> "Structural"
+            "monitor" in lower || "computer" in lower || "pc" in lower || "fan" in lower ||
+                "aircon" in lower || "air conditioner" in lower || "projector" in lower ||
+                "electrical" in lower || "wiring" in lower || "outlet" in lower || "socket" in lower -> "Electrical"
             else -> "Other"
         }
+    }
+
+    private fun extractJsonObject(raw: String): String? {
+        val trimmed = raw.trim()
+            .removePrefix("```json")
+            .removePrefix("```")
+            .removeSuffix("```")
+            .trim()
+
+        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+            return trimmed
+        }
+
+        val firstBrace = trimmed.indexOf('{')
+        val lastBrace = trimmed.lastIndexOf('}')
+        return if (firstBrace >= 0 && lastBrace > firstBrace) {
+            trimmed.substring(firstBrace, lastBrace + 1)
+        } else {
+            null
+        }
+    }
+
+    private fun isLikelyBrokenApplianceIssue(title: String, description: String): Boolean {
+        val text = "$title $description".lowercase()
+        val applianceKeywords = listOf(
+            "monitor", "computer", "pc", "electric fan", "fan", "aircon", "air con",
+            "air conditioner", "a/c", "projector", "printer", "socket", "outlet", "wiring"
+        )
+        val issueKeywords = listOf(
+            "broken", "not working", "defective", "damaged", "malfunction",
+            "leak", "leaking", "overheat", "overheating", "spark", "flicker",
+            "flickering", "burning smell", "short circuit", "no power", "won't turn on"
+        )
+
+        return applianceKeywords.any { keyword -> text.contains(keyword) } &&
+            issueKeywords.any { keyword -> text.contains(keyword) }
     }
 
     private fun ensureCameraPermissionAndCapture() {
@@ -423,4 +478,5 @@ class ReportHazardActivity : AppCompatActivity() {
                 currentLocation = location
             }
     }
+
 }
